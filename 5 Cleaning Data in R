@@ -1,1 +1,781 @@
 5 Cleaning Data in R
+Here's what messy data look like
+In the final chapter of this course, you will be presented with a messy, real-world dataset containing an entire year's worth of weather data from Boston, USA. Among other things, you'll be presented with variables that contain column names, column names that should be values, numbers coded as character strings, and values that are missing, extreme, and downright erroneous!
+
+Instructions
+100 XP
+We've placed some R code in the script to the right. Run the code as-is to see just how messy the weather data really are!
+# View the first 6 rows of data
+head(weather)
+
+# View the last 6 rows of data
+tail(weather)
+
+# View a condensed summary of the data
+str(weather)
+Here's what clean data look like
+In this course, you will acquire many new tools in your data cleaning toolbox for whipping the weather data into shape!
+
+Instructions
+100 XP
+Run the code provided to see what the weather dataset will look like by the time you are done cleaning it. If it's not immediately clear what's changed, don't worry! You will have a much deeper understanding by the end of this course.
+# View the first 6 rows of data
+head(weather_clean)
+
+# View the last 6 rows of data
+tail(weather_clean)
+
+# View a condensed summary of the data
+str(weather_clean)
+Getting a feel for your data
+The first thing to do when you get your hands on a new dataset is to understand its structure. There are several ways to go about this in R, each of which may reveal different issues with your data that require attention.
+
+In this course, we are only concerned with data that can be expressed in table format (i.e. two dimensions, rows and columns). As you may recall from earlier courses, tables in R often have the type data.frame. You can check the class of any object in R with the class() function.
+
+Once you know that you are dealing with tabular data, you may also want to get a quick feel for the contents of your data. Before printing the entire dataset to the console, it's probably worth knowing how many rows and columns there are. The dim() command tells you this.
+
+Instructions
+100 XP
+We've loaded a dataset called bmi into your workspace. The data, which give the (age standardized) mean body mass index (BMI) among males in each country for the years 1980-2008, come from the School of Public Health, Imperial College London.
+# Check the class of bmi
+class(bmi)
+
+# Check the dimensions of bmi
+dim(bmi)
+
+# View the column names of bmi
+names(bmi)
+Viewing the structure of your data
+Since bmi doesn't have a huge number of columns, you can view a quick snapshot of your data using the str() (for structure) command. In addition to the class and dimensions of your entire dataset, str() will tell you the class of each variable and give you a preview of its contents.
+
+Although we won't go into detail on the dplyr package in this lesson (see the Data Manipulation in R with dplyr course), the glimpse() function from dplyr is a slightly cleaner alternative to str(). str() and glimpse() give you a preview of your data, which may reveal issues with the way columns are labelled, how variables are encoded, etc.
+
+You can use the summary() command to get a better feel for how your data are distributed, which may reveal unusual or extreme values, unexpected missing data, etc. For numeric variables, this means looking at means, quartiles (including the median), and extreme values. For character or factor variables, you may be curious about the number of times each value appears in the data (i.e. counts), which summary() also reveals.
+
+Instructions
+100 XP
+Instructions
+100 XP
+View the structure of bmi using the traditional method.
+Load the dplyr package.
+View the structure of bmi using dplyr.
+Look at a summary() of bmi.
+# Check the structure of bmi
+
+str(bmi)
+# Load dplyr
+library(dplyr)
+
+# Check the structure of bmi, the dplyr way
+glimpse(bmi)
+
+# View a summary of bmi
+summary(bmi)
+Looking at your data
+You can look at all the summaries you want, but at the end of the day, there is no substitute for looking at your data -- either in raw table form or by plotting it.
+
+The most basic way to look at your data in R is by printing it to the console. As you may know from experience, the print() command is not even necessary; you can just type the name of the object. The downside to this option is that R will attempt to print the entire dataset, which can be a nuisance if the dataset is too large.
+
+One way around this is to use the head() and tail() commands, which only display the first and last 6 rows of data, respectively. You can view more (or fewer) rows by providing as a second argument to the function the number of rows you wish to view. These functions provide a useful method for quickly getting a sense of your data without overly cluttering the console.
+
+Instructions
+100 XP
+Instructions
+100 XP
+Print the full dataset to the console (you don't need print() to do this).
+View the first 6 rows of bmi.
+View the first 15 rows of bmi.
+View the last 6 rows of bmi.
+View the last 10 rows of bmi.
+# Print bmi to the console
+print(bmi)
+
+# View the first 6 rows
+
+head(bmi)
+# View the first 15 rows
+head(bmi,15)
+
+# View the last 6 rows
+
+tail(bmi)
+# View the last 10 rows
+tail(bmi,10)
+Visualizing your data
+There are many ways to visualize data. Since this is not a course about data visualization, we will only touch on two types of plots that may be useful for quickly identifying extreme or suspicious values in your data: histograms and scatter plots.
+
+A histogram, created with the hist() function, takes a vector (i.e. column) of data, breaks it up into intervals, then plots as a vertical bar the number of instances within each interval. A scatter plot, created with the plot() function, takes two vectors (i.e. columns) of data and plots them as a series of (x, y) coordinates on a two-dimensional plane.
+
+Let's look at a quick example of each.
+
+Instructions
+100 XP
+Instructions
+100 XP
+For the bmi dataset:
+
+Use hist() to look at the distribution of average BMI across all countries in 2008.
+Use plot() to see how each country's average BMI in 1980 (x-axis) compared with its BMI in 2008 (y-axis).
+# Histogram of BMIs from 2008
+
+hist(bmi$Y2008)
+# Scatter plot comparing BMIs from 1980 to those from 2008
+plot(bmi$Y1980,bmi$Y2008)
+#
+Gathering columns into key-value pairs
+The most important function in tidyr is gather(). It should be used when you have columns that are not variables and you want to collapse them into key-value pairs.
+
+The easiest way to visualize the effect of gather() is that it makes wide datasets long. As you saw in the video, running the following command on wide_df will make it long:
+
+gather(wide_df, my_key, my_val, -col)
+Experiment with this in the console before attempting the exercise.
+
+Instructions
+100 XP
+Apply the gather() function to bmi, saving the result to bmi_long. This will create two new columns:
+year, containing as values what are currently column headers
+bmi_val, the actual BMI values
+View the first 20 rows of bmi_long.
+# Apply gather() to bmi and save the result as bmi_long
+bmi_long <- gather(bmi, year, bmi_val, -Country)
+
+# View the first 20 rows of the result
+head(bmi_long,20)
+Spreading key-value pairs into columns
+The opposite of gather() is spread(), which takes key-values pairs and spreads them across multiple columns. This is useful when values in a column should actually be column names (i.e. variables). It can also make data more compact and easier to read.
+
+The easiest way to visualize the effect of spread() is that it makes long datasets wide. As you saw in the video, running the following command will make long_df wide:
+
+spread(long_df, my_key, my_val)
+Experiment with this in the console before attempting the exercise.
+
+Instructions
+100 XP
+Instructions
+100 XP
+Use spread() to reverse the operation that you performed in the last exercise with gather(). In other words, make bmi_long wide again, saving the result to bmi_wide.
+View the head of bmi_wide.
+# Apply spread() to bmi_long
+bmi_wide <- spread(bmi_long, year, bmi_val)
+
+# View the head of bmi_wide
+head(bmi_wide)
+
+Separating columns
+The separate() function allows you to separate one column into multiple columns. Unless you tell it otherwise, it will attempt to separate on any character that is not a letter or number. You can also specify a specific separator using the sep argument.
+
+We've loaded the small dataset from the video called treatments into your workspace. This dataset obeys the principles of tidy data, but we'd like to split the treatment dates into two separate columns: year and month. This can be accomplished with the following:
+
+separate(treatments, year_mo, c("year", "month"))
+Experiment with this in the console before attempting the exercis
+# Apply separate() to bmi_cc
+bmi_cc_clean <- separate(bmi_cc, col = Country_ISO, c("Country", "ISO"), sep = "/")
+
+# Print the head of the result
+head(bmi_cc_clean )
+
+
+Uniting columns
+The opposite of separate() is unite(), which takes multiple columns and pastes them together. By default, the contents of the columns will be separated by underscores in the new column, but this behavior can be altered via the sep argument.
+
+We've loaded the treatments data into your workspace again, but this time the year_mo column has been separated into year and month. The original column can be recreated by putting year and month back together:
+
+unite(treatments, year_mo, year, month)
+Experiment with this in the console before attempting the exercise.
+
+Instructions
+100 XP
+Instructions
+100 XP
+In the last exercise, you separated the Country_ISO column of the bmi_cc dataset into two columns (Country and ISO) and saved the result to bmi_cc_clean. Now you're going to put the columns back together!
+
+Apply the unite() function to bmi_cc_clean
+Reunite the Country and ISO columns into a single column called Country_ISO
+Separate each country name and code with a dash (-)
+Save the result as bmi_cc
+# Apply unite() to bmi_cc_clean
+bmi_cc <- unite(bmi_cc_clean,Country_ISO, Country, ISO, sep = "-")
+
+# View the head of the result
+head(bmi_cc)
+
+Column headers are values, not variable names
+You saw earlier in the chapter how we sometimes come across datasets where column names are actually values of a variable (e.g. months of the year). This is often the case when working with repeated measures data, where measurements are taken on subjects of interest on multiple occasions over time. The gather() function is helpful in these situations.
+
+tidyr and dplyr are already loaded for you.
+
+Instructions
+100 XP
+Instructions
+100 XP
+View the head of census.
+Gather the month columns, creating two new columns (month and amount), saving the result to census2.
+Run the code given to arrange() the rows of census2 by the YEAR column.
+View the first 20 rows of the result.
+# View the head of census
+head(census)
+
+# Gather the month columns
+census2 <- gather(census,month,amount,-YEAR)
+
+# Arrange rows by YEAR using dplyr's arrange
+census2_arr <- arrange(census2, YEAR)
+
+# View first 20 rows of census2_arr
+head(census2_arr,20)
+
+Variables are stored in both rows and columns
+Sometimes you'll run into situations where variables are stored in both rows and columns. To illustrate this, we've loaded the pets dataset from the video, which tells us in a convoluted way how many birds, cats, and dogs Jason, Lisa, and Terrence have. Print the pets dataset to see for yourself.
+
+Although it may not be immediately obvious, if we treat the values in the type column as variables and create a separate column for each of them, we can set things straight. To do this, we use the spread() function. Run the following code to see for yourself:
+
+spread(pets, type, num)
+The result shows the exact same information in a much clearer way! Notice that the spread() function took in three arguments. The first argument takes the name of your messy dataset (pets), the second argument takes the name of the column to spread into new columns (type), and the third argument takes the column that contains the value with which to fill in the newly spread out columns (num).
+
+Now let's try this on a new messy dataset census_long. What information does this tell us?
+
+tidyr and dplyr are already loaded for you.
+
+Instructions
+100 XP
+Instructions
+100 XP
+View the first 50 rows of census_long.
+Decide which column of census_long would be best to spread, and which column of census_long would be best to display in the newly spread out columns. Use the spread() function accordingly and save the result to census_long2.
+View the first 20 rows of census_long2.
+# View first 50 rows of census_long
+head(census_long,50)
+
+# Spread the type column
+census_long2 <-spread(census_long,type,amount) 
+
+# View first 20 rows of census_long2
+head(census_long2,20)
+
+Multiple values are stored in one column
+It's also fairly common that you will find two variables stored in a single column of data. These variables may be joined by a separator like a dash, underscore, space, or forward slash.
+
+The separate() function comes in handy in these situations. To practice using it, we have created a slight modification of last exercise's result. Keep in mind that the into argument, which specifies the names of the 2 new columns being formed, must be given as a character vector (e.g. c("column1", "column2")).
+
+tidyr and dplyr are already loaded for you.
+
+Instructions
+100 XP
+Instructions
+100 XP
+View the head of census_long3.
+Use tidyr's separate() to split the yr_month column into two separate variables: year and month, saving the result to census_long4.
+View the first 6 rows of the result.
+Take Hint (-30 XP)
+
+# View the head of census_long3
+head(census_long3)
+
+# Separate the yr_month column into two
+census_long4 <-separate(census_long3,yr_month, c("year","month")) 
+
+# View the first 6 rows of the result
+head(census_long4,6)
+Types of variables in R
+As in other programming languages, R is capable of storing data in many different formats, most of which you've probably seen by now.
+
+Loosely speaking, the class() function tells you what type of object you're working with. (There are subtle differences between the class, type, and mode of an object, but these distinctions are beyond the scope of this course.)
+# Make this evaluate to "character"
+class("TRUE")
+as.character("TRUE")
+# Make this evaluate to "numeric"
+class(8484.00)
+as.numeric(8484.00)
+
+# Make this evaluate to "integer"
+class(99L)
+as.integer(99L)
+
+Working with dates
+Dates can be a challenge to work with in any programming language, but thanks to the lubridate package, working with dates in R isn't so bad. Since this course is about cleaning data, we only cover the most basic functions from lubridate to help us standardize the format of dates and times in our data.
+
+As you saw in the video, these functions combine the letters y, m, d, h, m, s, which stand for year, month, day, hour, minute, and second, respectively. The order of the letters in the function should match the order of the date/time you are attempting to read in, although not all combinations are valid. Notice that the functions are "smart" in that they are capable of parsing multiple formats.
+
+Instructions
+100 XP
+We have loaded a dataset called students2 into your workspace. students2 is similar to students, except now instead of an age for each student, we have a (hypothetical) date of birth in the dob column. There's another new column called nurse_visit, which gives a timestamp for each student's most recent visit to the school nurse.
+
+Preview students2 with str(). Notice that dob and nurse_visit are both stored as character.
+Load the lubridate package.
+Print "17 Sep 2015" as a date.
+Print "July 15, 2012 12:56" as a date and time (note there are hours and minutes, but no seconds!).
+Coerce dob to a date (with no time).
+Coerce nurse_visit to a date and time.
+
+Working with dates
+Dates can be a challenge to work with in any programming language, but thanks to the lubridate package, working with dates in R isn't so bad. Since this course is about cleaning data, we only cover the most basic functions from lubridate to help us standardize the format of dates and times in our data.
+
+As you saw in the video, these functions combine the letters y, m, d, h, m, s, which stand for year, month, day, hour, minute, and second, respectively. The order of the letters in the function should match the order of the date/time you are attempting to read in, although not all combinations are valid. Notice that the functions are "smart" in that they are capable of parsing multiple formats.
+
+Instructions
+100 XP
+We have loaded a dataset called students2 into your workspace. students2 is similar to students, except now instead of an age for each student, we have a (hypothetical) date of birth in the dob column. There's another new column called nurse_visit, which gives a timestamp for each student's most recent visit to the school nurse.
+
+Preview students2 with str(). Notice that dob and nurse_visit are both stored as character.
+Load the lubridate package.
+Print "17 Sep 2015" as a date.
+Print "July 15, 2012 12:56" as a date and time (note there are hours and minutes, but no seconds!).
+Coerce dob to a date (with no time).
+Coerce nurse_visit to a date and time.
+# Preview students2 with str()
+
+str(students2)
+# Load the lubridate package
+library(lubridate)
+
+# Parse as date
+dmy("17 Sep 2015")
+
+# Parse as date and time (with no seconds!)
+mdy_hm("July 15, 2012 12:56")
+Trimming and padding strings
+One common issue that comes up when cleaning data is the need to remove leading and/or trailing white space. The str_trim() function from stringr makes it easy to do this while leaving intact the part of the string that you actually want.
+
+> str_trim("  this is a test     ")
+[1] "this is a test"
+A similar issue is when you need to pad strings to make them a certain number of characters wide. One example is if you had a bunch of employee ID numbers, some of which begin with one or more zeros. When reading these data in, you find that the leading zeros have been dropped somewhere along the way (probably because the variable was thought to be numeric and in that case, leading zeros would be unnecessary.)
+
+> str_pad("24493", width = 7, side = "left", pad = "0")
+[1] "0024493"
+Instructions
+100 XP
+Instructions
+100 XP
+Load the stringr package.
+Trim all leading and trailing white space from the first set of strings.
+Pad the second set of strings with leading zeros such that all are 9 characters in length.
+Upper and lower case
+In addition to trimming and padding strings, you may need to adjust their case from time to time. Making strings uppercase or lowercase is very straightforward in (base) R thanks to toupper() and tolower(). Each function takes exactly one argument: the character string (or vector/column of strings) to be converted to the desired case.
+
+Instructions
+100 XP
+There's a vector of state abbreviations called states in your workspace, but there's a problem...it's all lowercase. It's more common for state abbreviations to be all uppercase.
+
+Print states to the console.
+Make states all uppercase and save the result to states_upper.
+Make states_upper all lowercase again, but don't save the result.
+# Print state abbreviations
+states
+
+# Make states all uppercase and save result to states_upper
+
+states_upper<-toupper(states)
+# Make states_upper all lowercase again
+states_lower<-tolower(states)
+Finding and replacing strings
+The stringr package provides two functions that are very useful for finding and/or replacing patterns in strings: str_detect() and str_replace().
+
+Like all functions in stringr, the first argument of each is the string of interest. The second argument of each is the pattern of interest. In the case of str_detect(), this is the pattern we are searching for. In the case of str_replace(), this is the pattern we want to replace. Finally, str_replace() has a third argument, which is the string to replace with.
+
+> str_detect(c("banana", "kiwi"), "a")
+[1]  TRUE FALSE
+> str_replace(c("banana", "kiwi"), "a", "o")
+[1] "bonana" "kiwi"
+The data.frame students2 is already available for you in the workspace. stringr is already loaded. students3 is a copy of it for you to work on so you can always start from scratch if you happen to make a mistake.
+
+Instructions
+100 XP
+Instructions
+100 XP
+The students2 dataset from earlier in the chapter has been loaded for you again.
+
+Look at the head() of students3 to remind yourself of how it looks.
+Detect all dates of birth (dob) in 1997 using str_detect(). This should return a vector of TRUE and FALSE values.
+Replace all instances of "F" with "Female" in students3$sex.
+Replace all instances of "M" with "Male" in students3$sex.
+View the head() of students3 to see the result of these replacements.
+# Copy of students2: students3
+students3 <- students2
+
+# Look at the head of students3
+head(students3)
+
+# Detect all dates of birth (dob) in 1997
+str_detect(students3$dob,"1997")
+
+# In the sex column, replace "F" with "Female" ...
+students3$sex <- str_replace(students3$sex,"F","Female")
+
+# ... and "M" with "Male"
+students3$sex <- str_replace(students3$sex,"M","Male")
+
+# View the head of students3
+head(students3)
+Finding missing values
+As you've seen, missing values in R should be represented by NA, but unfortunately you will not always be so lucky. Before you can deal with missing values, you have to find them in the data.
+
+If missing values are properly coded as NA, the is.na() function will help you find them. Otherwise, if your dataset is too big to just look at the whole thing, you may need to try searching for some of the usual suspects like "", "#N/A", etc. You can also use the summary() and table() functions to turn up unexpected values in your data.
+
+In this exercise, we've created a simple dataset called social_df that has 3 pieces of information for each of four friends:
+
+Name
+Number of friends on a popular social media platform
+Current "status" on the platform
+Instructions
+100 XP
+Instructions
+100 XP
+Call is.na() on social_df to spot all NA values.
+Wrap the above with the any() function to ask the question "Are there any NA values in my dataset?".
+View a summary() of the dataset to see how missing values are broken out.
+Use table to identify odd values of the status variable
+# Call is.na() on the full social_df to spot all NAs
+is.na(social_df)
+
+# Use the any() function to ask whether there are any NAs in the data
+any(is.na(social_df))
+
+# View a summary() of the dataset
+summary(social_df)
+
+# Call table() on the status column
+table(social_df$status)
+Replace all empty strings (i.e. "") with NA in the status column of social_df.
+Print the updated version of social_df to confirm your changes.
+Use complete.cases() to return a vector containing TRUE and FALSE to see which rows have NO missing values.
+Use na.omit() to remove all rows with one or more missing values (without saving the result).
+Hint
+na.omit() with the social_df dataframe as an argument will print rows with complete information.
+# Replace all empty strings in status with NA
+social_df$status[social_df$status == ""] <- NA
+
+# Print social_df to the console
+social_df
+
+# Use complete.cases() to see which rows have no missing values
+complete.cases(social_df)
+
+# Use na.omit() to remove all rows with any missing values
+na.omit(social_df)
+
+Dealing with outliers and obvious errors
+When dealing with strange values in your data, you often must decide whether they are just extreme or actually erroneous. Extreme values show up all over the place, but you, the data analyst, must figure out when they are plausible and when they are not.
+
+We have loaded a dataset called students3, which is another slight variation of the original students dataset. Two variables appear to have suspicious values: age and absences. Let's explore these values further.
+
+Instructions
+100 XP
+Call summary() on the full students3 dataset to expose the concerning values of age and absences.
+View a histogram (using hist()) of the age variable.
+View a histogram of the absences variable.
+View another histogram of absences, but force values of zero to be bucketed to the right of zero on the x-axis with right = FALSE (see ?hist for more info).
+# Look at a summary() of students3
+summary(students3)
+
+# View a histogram of the age variable
+hist(students3$age)
+
+# View a histogram of the absences variable
+hist(students3$absences)
+
+# View a histogram of absences, but force zeros to be bucketed to the right of zero
+hist(students3$absences,right = FALSE)
+Another look at strange values
+Another useful way of looking at strange values is with boxplots. Simply put, boxplots draw a box around the middle 50% of values for a given variable, with a bolded horizontal line drawn at the median. Values that fall far from the bulk of the data points (i.e. outliers) are denoted by open circles. (If you're curious about the exact formula for determining what is "far", check out ?hist.)
+
+In this situation, we are concerned about three things:
+
+Since this dataset is about students and the only student above the age of 22 is 38 years old, we must wonder whether this is an error in the data or just an older student (perhaps returning to school after working for several years).
+There are four values of -1 for the absences variable, which is either a mistake or an intentional coding meant to say, for example, "this value is missing".
+There are several extreme values of absences in the positive direction, with a maximum value of 75 (which is over 18 times the median value of 4).
+Instructions
+100 XP
+View a boxplot() of the age variable from students3.
+View a boxplot() of the absences variable from
+# View a boxplot of age
+boxplot(students3$age)
+
+# View a boxplot of absences
+boxplot(students3$absences)
+Get a feel for the data
+Before diving into our data cleaning routine, we must first understand the basic structure of the data. This involves looking at things like the class() of the data object to make sure it's what we expect (generally a data.frame) in addition to checking its dimensions with dim() and the column names with names().
+
+Instructions
+100 XP
+For the weather dataset, which is loaded in your workspace:
+
+Check that it's a data.frame using the function class().
+Look at the dimensions.
+View the column names.
+# Verify that weather is a data.frame
+class(weather)
+
+# Check the dimensions
+dim(weather)
+
+# View the column names
+names(weather)
+Summarize the data
+Next up is to look at some summaries of the data. This is where functions like str(), glimpse() from dplyr, and summary() come in handy.
+
+Instructions
+100 XP
+View the structure of weather using base R.
+Load the dplyr package.
+View the structure of weather, the dplyr way.
+View a summary() of weather.
+# View the structure of the data
+str(weather)
+
+# Load dplyr package
+library(dplyr)
+
+# Look at the structure using dplyr's glimpse()
+glimpse(weather)
+
+# View a summary of the data
+summary(weather)
+Take a closer look
+After understanding the structure of the data and looking at some brief summaries, it often helps to preview the actual data. The functions head() and tail() allow you to view the top and bottom rows of the data, respectively. Recall you'll be shown 6 rows by default, but you can alter this behavior with a second argument to the function.
+
+Instructions
+100 XP
+For the weather data:
+
+View the first 6 rows.
+View the first 15 rows.
+View the last 6 rows.
+View the last 10 rows.
+# View first 6 rows
+head(weather,6)
+
+# View first 15 rows
+head(weather,15)
+
+# View the last 6 rows
+tail(weather,6)
+
+# View the last 10 rows
+tail(weather,10)
+Column names are values
+The weather dataset suffers from one of the five most common symptoms of messy data: column names are values. In particular, the column names X1-X31 represent days of the month, which should really be values of a new variable called day.
+
+The tidyr package provides the gather() function for exactly this scenario. To remind you of how it works, we've loaded a small dataset called df in your workspace. Give the following a try in the console before attempting the instructions below.
+
+gather(df, time, val, t1:t3)
+Notice that gather() allows you to select multiple columns to be gathered by using the : operator.
+
+Instructions
+100 XP
+Instructions
+100 XP
+Load the tidyr package.
+Call gather() on the weather data to gather columns X1-X31. The two columns created as a result should be called day and value. Save the result as weather2.
+View the result with head().
+
+# Load the tidyr package
+library(tidyr)
+
+# Gather the columns
+weather2 <- gather(weather, day,value,X1:X31, na.rm = TRUE)
+
+# View the head
+head(weather2)
+Values are variable names
+Our data suffer from a second common symptom of messy data: values are variable names. Specifically, values in the measure column should be variables (i.e. column names) in our dataset.
+
+The spread() function from tidyr is designed to help with this. To remind you of how this function works, we've loaded another small dataset called df2 (which is the result of applying gather() to the original df from last exercise). Give the following a try before attempting the instructions below.
+
+spread(df2, time, val)
+Note how the values of the time column now become column names. The tidyr package is already loaded.
+
+Instructions
+100 XP
+Instructions
+100 XP
+Using the code provided, remove the first column of weather2, assigning to without_x.
+Spread the measure column of without_x and save the result to weather3.
+View the result with head().
+# First remove column of row names
+without_x <- weather2[, -1]
+
+# Spread the data
+weather3 <- spread(without_x, measure, value)
+
+# View the head
+head(weather3)
+Clean up dates
+Now that the weather dataset adheres to tidy data principles, the next step is to prepare it for analysis. We'll start by combining the year, month, and day columns and recoding the resulting character column as a date. We can use a combination of base R, stringr, and lubridate to accomplish this task.
+
+tidyr and dplyr are already loaded.
+
+Instructions
+100 XP
+Load the stringr and lubridate packages.
+Use stringr's str_replace() to remove the Xs from the day column of weather3.
+Create a new column called date. Use the unite() function from tidyr to paste together the year, month, and day columns in order, using - as a separator (see ?unite if you need help).
+Coerce the date column using the appropriate function from lubridate.
+Use the code provided (select()) to reorder columns, saving the result to weather5.
+View the head of weather5.
+# Load the stringr and lubridate packages
+library(stringr)
+library(lubridate)
+
+# Remove X's from day column
+weather3$day <-str_replace(weather3$day,"X","") 
+
+# Unite the year, month, and day columns
+weather4 <- unite(weather3, date, year, month,day, sep = "-")
+
+# Convert date column to proper date format using lubridates's ymd()
+weather4$date <- ymd(weather4$date)
+
+# Rearrange columns using dplyr's select()
+weather5 <- select(weather4, date, Events, CloudCover:WindDirDegrees)
+
+# View the head of weather5
+head(weather5)
+
+A closer look at column types
+It's important for analysis that variables are coded appropriately. This is not yet the case with our weather data. Recall that functions such as as.numeric() and as.character() can be used to coerce variables into different types.
+
+It's important to keep in mind that coercions are not always successful, particularly if there's some data in a column that you don't expect. For example, the following will cause problems:
+
+as.numeric(c(4, 6.44, "some string", 222))
+If you run the code above in the console, you'll get a warning message saying that R introduced an NA in the process of coercing to numeric. This is because it doesn't know how to make a number out of a string ("some string"). Watch out for this in our weather data!
+
+Instructions
+100 XP
+Use str() to see how variables are stored in weather5.
+View the first 20 rows of weather5. Keep an eye out for strange values!
+Try coercing the PrecipitationIn column of weather5 to numeric without saving the result
+# View the structure of weather5
+
+str(weather5)
+# Examine the first 20 rows of weather5. Are most of the characters numeric?
+head(weather5,20)
+
+
+# See what happens if we try to convert PrecipitationIn to numeric
+as.numeric(weather5$PrecipitationIn)
+
+Find missing values
+Before dealing with missing values in the data, it's important to find them and figure out why they exist in the first place. If your dataset is too big to look at all at once, like it is here, remember you can use sum() and is.na() to quickly size up the situation by counting the number of NA values.
+
+The summary() function may also come in handy for identifying which variables contain the missing values. Finally, the which() function is useful for locating the missing values within a particular column.
+
+Instructions
+100 XP
+Instructions
+100 XP
+Use sum() and is.na() to count the number of NA values in weather6.
+Look at a summary() of weather6 to figure out how the missings are distributed among the different variables.
+Use which() to identify the indices (i.e. row numbers) where Max.Gust.SpeedMPH is NA and save the result to ind (for indices).
+Use ind to look at the full rows of weather6 for which Max.Gust.SpeedMPH is missing.
+# Count missing values
+is.na(weather6)
+sum(is.na(weather6))
+# Find missing values
+summary(weather6)
+
+# Find indices of NAs in Max.Gust.SpeedMPH
+ind <-which(is.na(weather6$Max.Gust.SpeedMPH)) 
+
+# Look at the full rows for records missing Max.Gust.SpeedMPH
+weather6[ind, ]
+
+An obvious error
+Besides missing values, we want to know if there are values in the data that are too extreme or bizarre to be plausible. A great way to start the search for these values is with summary().
+
+Once implausible values are identified, they must be dealt with in an intelligent and informed way. Sometimes the best way forward is obvious and other times it may require some research and/or discussions with the original collectors of the data.
+
+Instructions
+0 XP
+Instructions
+0 XP
+View a summary() of weather6.
+Use which() to find the index of the erroneous element of weather6$Max.Humidity, saving the result to ind.
+Use ind to look at the full row of weather6 for that day.
+You discover an extra zero was accidentally added to this value. Correct it in the data.
+Hint
+As in the last exercise, you can use the which() function to find indices in a vector that meet a logical condition. ?which will provide more information about the function.
+ Review distributions for all variables
+summary(weather6)
+
+# Find row with Max.Humidity of 1000
+ind <- which(weather6$Max.Humidity == 1000)
+
+# Look at the data for that day
+weather6[ind, ]
+
+# Change 1000 to 100
+weather6$Max.Humidity[ind] <- 100
+
+Another obvious error
+You've discovered and repaired one obvious error in the data, but it appears that there's another. Sometimes you get lucky and can infer the correct or intended value from the other data. For example, if you know the minimum and maximum values of a particular metric on a given day...
+
+Instructions
+100 XP
+Instructions
+100 XP
+Use summary() to look at the value of only the Mean.VisibilityMiles variable of weather6.
+Determine the element of the value that is clearly erroneous in this column, saving the result to ind.
+Use ind to look at the full row of weather6 for this day.
+Inspect the values of other variables for this day to determine the correct value of Mean.VisibilityMiles, then make the appropriate fix.
+# Look at summary of Mean.VisibilityMiles
+summary(weather6$Mean.VisibilityMiles)
+
+# Get index of row with -1 value
+ind <-which(weather6$Mean.VisibilityMiles==-1) 
+
+# Look at full row
+weather6[ind,]
+
+# Set Mean.VisibilityMiles to the appropriate value
+weather6$Mean.VisibilityMiles[ind] <-10
+
+Check other extreme values
+In addition to dealing with obvious errors in the data, we want to see if there are other extreme values. In addition to the trusty summary() function, hist() is useful for quickly getting a feel for how different variables are distributed.
+
+Instructions
+100 XP
+Check a summary() of weather6 one more time for extreme or unexpected values.
+View a histogram for MeanDew.PointF.
+Do the same for Min.TemperatureF.
+And once more for Mean.Temperatu
+Check other extreme values
+In addition to dealing with obvious errors in the data, we want to see if there are other extreme values. In addition to the trusty summary() function, hist() is useful for quickly getting a feel for how different variables are distributed.
+
+Instructions
+100 XP
+Check a summary() of weather6 one more time for extreme or unexpected values.
+View a histogram for MeanDew.PointF.
+Do the same for Min.TemperatureF.
+And once more for Mean.Temperatu
+# Review summary of full data once more
+summary(weather6)
+
+# Look at histogram for MeanDew.PointF
+hist(weather6$MeanDew.PointF)
+
+# Look at histogram for Min.TemperatureF
+hist(weather6$Min.TemperatureF)
+
+# Compare to histogram for Mean.TemperatureF
+hist(weather6$Mean.TemperatureF)
+Finishing touches
+Before officially calling our weather data clean, we want to put a couple of finishing touches on the data. These are a bit more subjective and may not be necessary for analysis, but they will make the data easier for others to interpret, which is generally a good thing.
+
+There are a number of stylistic conventions in the R language. Depending on who you ask, these conventions may vary. Because the period (.) has special meaning in certain situations, we generally recommend using underscores (_) to separate words in variable names. We also prefer all lowercase letters so that no one has to remember which letters are uppercase or lowercase.
+
+Finally, the events column (renamed to be all lowercase in the first instruction) contains an empty string ("") for any day on which there was no significant weather event such as rain, fog, a thunderstorm, etc. However, if it's the first time you're seeing these data, it may not be obvious that this is the case, so it's best for us to be explicit and replace the empty strings with something more meaningful.
+
+Instructions
+100 XP
+We've created a vector of column names in your workspace called new_colnames, all of which obey the conventions described above. Clean up the column names of weather6 by assigning new_colnames to names(weather6).
+Replace all empty strings in the events column of weather6 with "None".
+One last time, print out the first 6 rows of the weather6 data frame to see the changes.
+# Clean up column names
+names(weather6) <-new_colnames 
+
+# Replace empty cells in events column
+weather6$events[weather6$events == ""] <- "None"
+    
+# Print the first 6 rows of weather6
+head(weather6,6)
+
