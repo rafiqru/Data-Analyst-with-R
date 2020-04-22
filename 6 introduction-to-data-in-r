@@ -1,0 +1,398 @@
+6 introduction-to-data-in-r
+Loading data into R
+In the previous video, we saw how to load the hsb2 dataset into R using the data() function and how to preview its contents with str().
+
+In this exercise, we'll practice on another dataset, email50, which contains a subset of incoming emails for the first three months of 2012 for a single email account. We'll examine the structure of this dataset and determine the number of rows (observations) and columns (variables).
+
+Instructions
+100 XP
+Load the email50 dataset with the data() function.
+View the structure of this dataset with the str() function. How many observations and variables are there?
+# Load data
+data(email50)
+
+# View the structure of the data
+str(email50)
+Identify variable types
+Recall from the video that the glimpse() function from dplyr provides a handy alternative to str() for previewing a dataset. In addition to the number of observations and variables, it shows the name and type of each column, along with a neatly printed preview of its values.
+
+Let's have another look at the email50 data, so we can practice identifying variable types.
+# Glimpse email50
+glimpse(email50)
+Filtering based on a factor
+Categorical data are often stored as factors in R. In this exercise, we'll practice working with a factor variable, number, from the email50 dataset. This variable tells us what type of number (none, small, or big) an email contains.
+
+Recall from the video that the filter() function from dplyr can be used to filter a dataset to create a subset containing only certain levels of a variable. For example, the following code filters the mtcars dataset for cars containing 6 cylinders:
+
+mtcars %>%
+  filter(cyl == 6)
+Instructions
+100 XP
+Instructions
+100 XP
+Create a new dataset called email50_big that is a subset of the original email50 dataset containing only emails with "big" numbers. This information is stored in the number variable.
+Report the dimensions of email50_big using the glimpse() function again. How many emails contain big numbers?
+# Subset of emails with big numbers: email50_big
+email50_big <- email50 %>%
+  filter(email50$number=="big")
+
+# Glimpse the subset
+glimpse(email50_big 
+Complete filtering based on a factor
+The droplevels() function removes unused levels of factor variables from our dataset. As we saw in the video, it's often useful to determine which levels are unused (i.e. contain zero values) with the table() function.
+
+In this exercise, we'll see which levels of the number variable are dropped after applying the droplevels() function.
+
+Instructions
+100 XP
+Make a table() of the number variable in the email50_big dataset. Which two levels are unused?
+Apply the droplevels() function to the number variable. Assign the result to email50_big$number_dropped.
+Remake the table() of the number_dropped variable in the email50_big dataset. How is this output different from the first?
+
+# Table of the number variable
+table(email50_big$number)
+
+# Drop levels
+email50_big$number <- droplevels(email50_big$numbe)
+
+# Another table of the number variable
+table(email50_big$number)
+Discretize a different variable
+In this exercise, we'll create a categorical version of the num_char variable in the email50 dataset. num_char is the number of characters in an email, in thousands. This new variable will have two levels ("below median" and "at or above median") depending on whether an email has less than the median number of characters or equal to or more than that value.
+
+The median marks the 50th percentile, or midpoint, of a distribution, so half of the emails should fall in one category and the other half in the other. You will learn more about the median and other measures of center in the next course in this series.
+
+Instructions
+100 XP
+The email50 dataset is available in your workspace.
+
+Find the median number of characters in emails, save the result as med_num_char.
+Using mutate(), create a new column called num_char_cat, which discretizes the num_char variable into "below median" or "at or above median". Assign the result to email50_fortified.
+Then, using count(), determine the number of emails in each level of num_char_cat. Evaluate whether these counts match the expected numbers.
+# Calculate median number of characters: med_num_char
+med_num_char <- median(email50$num_char)
+
+# Create num_char_cat variable in email50
+email50_fortified <- email50 %>% mutate(num_char_cat=ifelse(num_char < med_num_char,"below median","at or above median"))
+  
+# Count emails in each category
+email50_fortified %>%
+  count(num_char_cat)
+  
+  Combining levels of a different factor
+Another common way of creating a new variable based on an existing one is by combining levels of a categorical variable. For example, the email50 dataset has a categorical variable called number with levels "none", "small", and "big", but suppose we're only interested in whether an email contains a number. In this exercise, we will create a variable containing this information and also visualize it.
+
+For now, do your best to understand the code we've provided to generate the plot. We will go through it in detail in the next video.
+
+Instructions
+100 XP
+Instructions
+100 XP
+Create a new column in email50 called number_yn that is "no" if there is no number in the email and "yes" otherwise. Use case_when() for this . Assign this to email50_fortified. Remember that you can type ?case_when in the console to get a refresher on how to use it!
+
+Run the code provided to visualize the distribution of the number_yn variable.
+
+# Create number_yn column in email50
+email50_fortified <- email50 %>%
+  mutate(
+    number_yn = case_when(
+      # if number is "none", make number_yn "no"
+      number == "none" ~ "no",
+      # if number is not "none", make number_yn "yes"
+      number != "none" ~ "yes"
+    )
+  )
+
+# Visualize the distribution of number_yn
+ggplot(email50_fortified, aes(x = number_yn)) +
+  geom_bar()
+  
+  #Visualizing numerical and categorical data
+In this exercise, we'll visualize the relationship between two numerical variables from the email50 dataset, conditioned on whether or not the email was spam. This means that we will use an aspect of the plot (like color or shape) to identify the levels in the spam variable so that we can compare plotted values between them.
+
+Recall that in the ggplot() function, the first argument is the dataset, then we map the aesthetic features of the plot to variables in the dataset, and finally the geom_*() layer informs how data are represented on the plot. In this exercise, we will make a scatterplot by adding a geom_point() layer to the ggplot() call.
+
+Instructions
+100 XP
+Create a scatterplot of number of exclamation points (exclaim_mess) on the y-axis vs. number of characters (num_char) on the x-axis.
+
+Color points by whether or not the email is spam.
+Note that the spam variable is stored as numerical (0/1) but we want to use it as a categorical variable in this plot. To do this, force R to think of it as such with the factor() function.
+Based on the plot, does there appear to be a relationship between these variables?
+
+# Load ggplot2
+library(ggplot2)
+
+# Scatterplot of exclaim_mess vs. num_char
+ggplot(email50, aes(x = num_char, y = exclaim_mess, color = factor(spam))) +
+  geom_point()
+  
+ #Identify type of study: Reading speed and font
+A study is designed to evaluate whether people read text faster in Arial or Helvetica font. A group of volunteers who agreed to be a part of the study are randomly assigned to two groups: one where they read some text in Arial, and another where they read the same text in Helvetica. At the end, average reading speeds from the two groups are compared.
+
+What type of study is this?Observational study
+press
+
+Identify type of study: Countries
+Next, let's take a look at data from a different study on country characteristics. First, load the data and view it, then identify the type of study. Remember, an experiment requires random assignment.
+
+Instructions
+100 XP
+Load the gapminder data. This dataset comes from the gapminder R package, which has already been loaded.
+View the variables in the dataset with glimpse().
+If these data come from an observational study, assign "observational" to the type_of_study variable. If experimental, assign "experimental".
+# Load data
+
+data(gapminder)
+# Glimpse data
+glimpse(gapminder)
+
+# Identify type of study: observational or experimental
+type_of_study <-"observational"
+
+#One of the early studies linking smoking and lung cancer compared patients who are already hospitalized with lung cancer to similar patients without lung cancer (hospitalized for other reasons), and recorded whether each patient smoked. Then, proportions of smokers for patients with and without lung cancer were compared.
+
+Does this study employ random sampling and/or random assignment?
+Random sampling, but not random assignment
+press
+
+#Identify the scope of inference of study
+Volunteers were recruited to participate in a study where they were asked to type 40 bits of trivia—for example, "an ostrich’s eye is bigger than its brain"—into a computer. A randomly selected half of these subjects were told the information would be saved in the computer; the other half were told the items they typed would be erased.
+
+Then, the subjects were asked to remember these bits of trivia, and the number of bits of trivia each subject could correctly recall were recorded. It was found that the subjects were significantly more likely to remember information if they thought they would not be able to find it later.
+
+The results of the study ___ be generalized to all people and a causal link between believing information is stored and memory ___ be inferred based on these results.cannot, cannot
+press
+Number of males and females admitted
+The goal of this exercise is to determine the numbers of male and female applicants who got admitted and rejected. Specifically, we want to find out how many males are admitted and how many are rejected. And similarly we want to find how many females are admitted and how many are rejected.
+
+To do so we will use the count() function from the dplyr package.
+
+In one step, count() groups the data and then tallies the number of observations in each level of the grouping variable. These counts are available under a new variable called n.
+
+Instructions
+100 XP
+Pass the gender and admission status columns to count() on the ucb_admit dataset (which is already pre-loaded) to count how many of each gender are admitted and how many are rejected.
+# Load packages
+library(dplyr)
+
+# Count number of male and female applicants admitted
+ucb_admit %>%
+  count(Gender,Admit)
+  
+  #Proportion of males admitted overall
+Next we'll calculate the percentage of males and percentage of females admitted, by creating a new variable, called prop (short for proportion) based off of the counts calculated in the previous exercise and using the mutate() from the dplyr package.
+
+Proportions for each row of the data frame we created in the previous exercise can be calculated as n / sum(n). Note that since the data are grouped by gender, sum(n) will be calculated for males and females separately.
+
+Instructions
+100 XP
+Instructions
+100 XP
+The table of counts of gender and admission status you developed earlier is available as ucb_admission_counts.
+
+Group the data by gender.
+Create the new variable described above, prop, the proportion of males and females admitted.
+Filter the data for those who are admitted so that the resulting data frame only contains proportions of males and females who are admitted.
+Which gender has a higher admission rate, male or female?
+ucb_admission_counts %>%
+  # Group by gender
+  group_by(Gender) %>%
+  # Create new variable
+  mutate(prop =n / sum(n)) %>%
+  # Filter for admitted
+  filter(Admit == "Admitted")
+  Proportion of males admitted for each department
+Finally we'll make a table similar to the one we constructed earlier, except we'll first group the data by department. The goal is to compare the proportions of male admitted students across departments.
+
+Proportions for each row of the data frame we create can be calculated as n / sum(n). Note that since the data are grouped by department and gender, sum(n) will be calculated for males and females separately for each department.
+
+Instructions 1/2
+50 XP
+Instructions 1/2
+50 XP
+ucb_admit has been pre-loaded for you.
+
+Assign ucb_admission_counts as the count() of ucb_admit by department, gender, and admission statu
+ucb_admission_counts <- ucb_admit %>%
+  # Counts by department, then gender, then admission status
+  count(Dept, Gender, Admit)
+
+# See the result
+ucb_admission_counts
+
+Admission rates for males across departments
+The final result from the previous exercise is available in your workspace as perc_admit_by_dept. Which of the following best describes the relationship between admission status and gender?
+
+Instructions
+50 XP
+Possible Answers
+Within most departments, female applicants are more likely to be admitted.
+
+Identify type of study: Countries [new]
+Next, let's take a look at data from a different study on country characteristics. The data come from the gapminder R package. To view the top 10 rows of the data, simply type gapminder in the console. You are welcomed to view the data using other functionality we have learned so far as well.
+
+Then, identify the type of study this data come from.
+
+Instructions
+50 XP
+Possible Answers
+Observational study
+Sampling strategies, determine which
+A consulting company is planning a pilot study on marketing in Boston. They identify the zip codes that make up the greater Boston area, then sample 50 randomly selected addresses from each zip code and mail a coupon to these addresses. They then track whether the coupon was used in the following month.
+
+What sampling strategy has this company used?
+
+Answer the question
+50 XP
+Possible Answers
+Simple random sample
+#
+Sampling strategies, choose worst
+A school district has requested a survey be conducted on the socioeconomic status of their students. Their budget only allows them to conduct the survey in some of the schools, hence they need to first sample a few schools.
+
+Students living in this district generally attend a school in their neighborhood. The district is broken into many distinct and unique neighborhoods, some including large single-family homes and others with only low-income housing.
+
+Which approach would likely be the least effective for selecting the schools where the survey will be conducted?
+
+Answer the question
+50 XP
+Possible Answers
+Simple random sampling
+
+Simple random sample in R
+Suppose we want to collect some data from a sample of eight states. A list of all states and the region they belong to (Northeast, Midwest, South, West) are given in the us_regions data frame.
+
+Instructions
+100 XP
+The dplyr package and us_regions data frame have been loaded.
+
+Use simple random sampling to select eight states from us_regions. Save this sample in a data frame called states_srs.
+Count the number of states from each region in your sample.
+# Simple random sample: states_srs
+states_srs <- us_regions %>%
+  sample_n(size=8)
+
+# Count states by region
+states_srs %>%
+  count(region)
+  #
+  Stratified sample in R
+In the previous exercise, we took a simple random sample of eight states. However, we did not have any control over how many states from each region got sampled. The goal of stratified sampling in this context is to have control over the number of states sampled from each region. Our goal for this exercise is to sample an equal number of states from each region.
+
+Instructions
+100 XP
+Instructions
+100 XP
+The dplyr package has been loaded and us_regions is still available in your workspace.
+
+Use stratified sampling to select a total of 8 states, where each stratum is a region. Save this sample in a data frame called states_str. Remember that there are 4 regions, each to be sampled equally!
+Count the number of states from each region in your sample to confirm that each region is represented equally in your sample.
+# Stratified sample
+states_str <-us_regions %>%
+  group_by(region) %>%
+  sample_n(size=2)
+
+# Count states by region
+states_str %>%
+ count(region)
+ #
+ Identifying components of a study
+A researcher designs a study to test the effect of light and noise levels on exam performance of students. The researcher also believes that light and noise levels might have different effects on males and females, so she wants to make sure both genders are represented equally under different conditions.
+
+Which of the below is correct?
+
+Answer the question
+50 XP
+Possible Answers
+There are 3 explanatory variables (light, noise, gender) and 1 response variable (exam performance).
+press
+#Experimental design terminology
+___ variables are conditions you can impose on the experimental units, while ___ variables are characteristics that the experimental units come with that you would like to control for.
+
+Answer the question
+50 XP
+Possible Answers
+Blocking, explanatory
+press
+#Connect blocking and stratifying
+In random sampling, we use ___ to control for a variable. In random assignment, we use ___ to achieve the same goal.
+
+Answer the question
+50 XP
+Possible Answers
+stratifying, blocking
+
+##Inspect the data
+The purpose of this chapter is to give you an opportunity to apply and practice what you've learned on a real world dataset. For this reason, we'll provide a little less guidance than usual.
+
+The data from the study described in the video are available in your workspace as evals. Let's take a look!
+
+Instructions
+100 XP
+Inspect the evals data frame using techniques you learned in previous chapters. Use an approach that shows you how many observations and variables are included in the dataset.
+# Inspect evals
+str(evals)
+
+Identify variable types
+It's always useful to start your exploration of a dataset by identifying variable types. The results from this exercise will help you design appropriate visualizations and calculate useful summary statistics later in your analysis.
+
+Instructions
+100 XP
+Explore the evals data once again with the following goals in mind: (1) Identify each variable as numerical or categorical. (2) If numerical, determine if it is discrete or continuous. (3) If categorical, determine if it is ordinal or not.
+We've created a vector of variable names in the editor called cat_vars. To test your understanding of the data, remove the names of any variables that are not categorical.
+# Inspect variable types
+glimpse(evals)
+
+# Remove non-factor variables from the vector below
+cat_vars <- c("rank", "ethnicity", "gender", "language", "cls_level", "cls_profs", "cls_credits",
+               "pic_outfit", "pic_color")
+  
+#Recode a variable
+The cls_students variable in evals tells you the number of students in the class. Suppose instead of the exact number of students, you're interested in whether the class is
+
+"small" (18 students or fewer),
+"midsize" (19 - 59 students), or
+"large" (60 students or more).
+Instructions
+0 XP
+Instructions
+0 XP
+Recode the cls_students variable into a new variable, cls_type, using case_when(). This new variable should have three levels as described above. Save the resulting data frame (with the new variable) as evals.
+What type of variable is cls_type?
+# Recode cls_students as cls_type
+evals_fortified <- evals %>%
+  mutate(
+    cls_type = case_when(
+      cls_students <= 18                      ~ "small",
+      cls_students >= 19 & cls_students <= 59 ~ "midsize",
+      cls_students >= 60                      ~ "large"
+    )
+  )
+  Create a scatterplot
+The bty_avg variable shows the average beauty rating of the professor by the six students who were asked to rate the attractiveness of these faculty. The score variable shows the average professor evaluation score, with 1 being very unsatisfactory and 5 being excellent.
+
+Instructions
+100 XP
+Use ggplot() to create a scatterplot displaying the relationship between these two variables.
+How would you describe the relationship apparent in this visualization?
+# Scatterplot of score vs. bty_avg
+ggplot(evals, aes(bty_avg,score))+geom_point()
+Create a scatterplot, with an added layer
+Suppose you are interested in evaluating how the relationship between a professor's attractiveness and their evaluation score varies across different class types (small, midsize, and large).
+
+Instructions
+100 XP
+Recreate your visualization from the previous exercise, but this time coloring the points by class type.
+How would you describe the relationship apparent in this visualization?
+# Scatterplot of score vs. bty_avg colored by cls_type
+ggplot(evals, aes(bty_avg,score,color=cls_type)) +geom_point()
+
+
+
+
+
+
+
+
+
